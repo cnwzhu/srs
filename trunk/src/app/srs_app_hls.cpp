@@ -320,6 +320,7 @@ srs_error_t SrsHlsMuxer::update_config(SrsRequest* r, string entry_prefix,
    
     // generate the m3u8 dir and path.
     m3u8_url = srs_path_build_stream(m3u8_file, req->vhost, req->app, req->stream);
+    m3u8_url = srs_path_build_timestamp(m3u8_url);
     m3u8 = path + "/" + m3u8_url;
     
     // when update config, reset the history target duration.
@@ -738,30 +739,31 @@ srs_error_t SrsHlsMuxer::refresh_m3u8()
 srs_error_t SrsHlsMuxer::_refresh_m3u8(string m3u8_file)
 {
     srs_error_t err = srs_success;
-    
+
     // no segments, return.
     if (segments->empty()) {
         return err;
     }
-    
+
     SrsFileWriter writer;
     if ((err = writer.open(m3u8_file)) != srs_success) {
         return srs_error_wrap(err, "hls: open m3u8 file %s", m3u8_file.c_str());
     }
-    
+
     // #EXTM3U\n
     // #EXT-X-VERSION:3\n
     std::stringstream ss;
     ss << "#EXTM3U" << SRS_CONSTS_LF;
     ss << "#EXT-X-VERSION:3" << SRS_CONSTS_LF;
-    
+
     // #EXT-X-MEDIA-SEQUENCE:4294967295\n
     SrsHlsSegment* first = dynamic_cast<SrsHlsSegment*>(segments->first());
     ss << "#EXT-X-MEDIA-SEQUENCE:" << first->sequence_no << SRS_CONSTS_LF;
-    
+    ss << "#EXT-X-PLAYLIST-TYPE:VOD" << SRS_CONSTS_LF;
+    ss << "#EXT-X-ALLOW-CACHE:YES" <<SRS_CONSTS_LF;
     // iterator shared for td generation and segemnts wrote.
     std::vector<SrsHlsSegment*>::iterator it;
-    
+
     // #EXT-X-TARGETDURATION:4294967295\n
     /**
      * @see hls-m3u8-draft-pantos-http-live-streaming-12.pdf, page 25
@@ -774,40 +776,40 @@ srs_error_t SrsHlsMuxer::_refresh_m3u8(string m3u8_file)
     // @see https://github.com/ossrs/srs/issues/304#issuecomment-74000081
     srs_utime_t max_duration = segments->max_duration();
     int target_duration = (int)ceil(srsu2msi(srs_max(max_duration, max_td)) / 1000.0);
-    
+
     ss << "#EXT-X-TARGETDURATION:" << target_duration << SRS_CONSTS_LF;
-    
+
     // write all segments
     for (int i = 0; i < segments->size(); i++) {
         SrsHlsSegment* segment = dynamic_cast<SrsHlsSegment*>(segments->at(i));
-        
+
         if (segment->is_sequence_header()) {
             // #EXT-X-DISCONTINUITY\n
             ss << "#EXT-X-DISCONTINUITY" << SRS_CONSTS_LF;
         }
-        
+
         if(hls_keys && ((segment->sequence_no % hls_fragments_per_key) == 0)) {
             char hexiv[33];
             srs_data_to_hex(hexiv, segment->iv, 16);
             hexiv[32] = '\0';
-            
+
             string key_file = srs_path_build_stream(hls_key_file, req->vhost, req->app, req->stream);
             key_file = srs_string_replace(key_file, "[seq]", srs_int2str(segment->sequence_no));
-            
+
             string key_path = key_file;
             //if key_url is not set,only use the file name
             if (!hls_key_url.empty()) {
                 key_path = hls_key_url + key_file;
             }
-            
+
             ss << "#EXT-X-KEY:METHOD=AES-128,URI=" << "\"" << key_path << "\",IV=0x" << hexiv << SRS_CONSTS_LF;
         }
-        
+
         // "#EXTINF:4294967295.208,\n"
         ss.precision(3);
         ss.setf(std::ios::fixed, std::ios::floatfield);
         ss << "#EXTINF:" << srsu2msi(segment->duration()) / 1000.0 << ", no desc" << SRS_CONSTS_LF;
-        
+
         // {file name}\n
         std::string seg_uri = segment->uri;
         if (true) {
@@ -817,14 +819,15 @@ srs_error_t SrsHlsMuxer::_refresh_m3u8(string m3u8_file)
         }
         //ss << segment->uri << SRS_CONSTS_LF;
         ss << seg_uri << SRS_CONSTS_LF;
+        ss << "#EXT-X-ENDLIST" <<SRS_CONSTS_LF;
     }
-    
+
     // write m3u8 to writer.
     std::string m3u8 = ss.str();
     if ((err = writer.write((char*)m3u8.c_str(), (int)m3u8.length(), NULL)) != srs_success) {
         return srs_error_wrap(err, "hls: write m3u8");
     }
-    
+
     return err;
 }
 
