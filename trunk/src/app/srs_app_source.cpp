@@ -1704,23 +1704,23 @@ srs_error_t SrsSourceManager::fetch_or_create(SrsRequest* r, ISrsSourceHandler* 
     SrsLocker(lock);
     
     SrsSource* source = NULL;
-    if ((source = fetch(r)) != NULL) {
+/*    if ((source = fetch(r)) != NULL) {
         *pps = source;
         return err;
-    }
+    }*/
     
     string stream_url = r->get_stream_url();
     string vhost = r->vhost;
     
     // should always not exists for create a source.
-    srs_assert (pool.find(stream_url) == pool.end());
+    //  srs_assert (pool.find(stream_url) == pool.end());
     
     source = new SrsSource();
     if ((err = source->initialize(r, h)) != srs_success) {
         return srs_error_wrap(err, "init source %s", r->get_stream_url().c_str());
     }
     
-    pool[stream_url] = source;
+    //pool[stream_url] = source;
     
     *pps = source;
     
@@ -1742,7 +1742,6 @@ SrsSource* SrsSourceManager::fetch(SrsRequest* r)
     // for origin auth is on, the token in request maybe invalid,
     // and we only need to update the token of request, it's simple.
     source->update_auth(r);
-    
     return source;
 }
 

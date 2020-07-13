@@ -659,13 +659,14 @@ srs_error_t SrsHlsMuxer::do_segment_close()
     
     // shrink the segments.
     segments->shrink(hls_window);
-    
-    // refresh the m3u8, donot contains the removed ts
-    err = refresh_m3u8();
-    
+
     // remove the ts file.
     segments->clear_expired(hls_cleanup);
-    
+
+    // refresh the m3u8, donot contains the removed ts
+    err = refresh_m3u8();
+
+
     // check ret of refresh m3u8
     if (err != srs_success) {
         return srs_error_wrap(err, "hls: refresh m3u8");

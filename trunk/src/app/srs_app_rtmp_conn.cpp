@@ -551,7 +551,7 @@ srs_error_t SrsRtmpConn::stream_service_cycle()
             return srs_error_new(ERROR_SYSTEM_CLIENT_INVALID, "rtmp: unknown client type=%d", info->type);
         }
     }
-    
+
     return err;
 }
 
@@ -832,12 +832,12 @@ srs_error_t SrsRtmpConn::publishing(SrsSource* source)
     // but failed, so we must cleanup it.
     // @see https://github.com/ossrs/srs/issues/474
     // @remark when stream is busy, should never release it.
-    if (srs_error_code(err) != ERROR_SYSTEM_STREAM_BUSY) {
+/*    if (srs_error_code(err) != ERROR_SYSTEM_STREAM_BUSY) {
         release_publish(source);
-    }
-    
+    }*/
+    release_publish(source);
     http_hooks_on_unpublish();
-    
+    srs_freep(source);
     return err;
 }
 
