@@ -64,9 +64,12 @@ srs_error_t SrsHttpHooks::on_connect(string url, SrsRequest* req)
     
     SrsJsonObject* obj = SrsJsonAny::object();
     SrsAutoFree(SrsJsonObject, obj);
-    
+
+
     obj->set("action", SrsJsonAny::str("on_connect"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id", SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -99,7 +102,9 @@ void SrsHttpHooks::on_close(string url, SrsRequest* req, int64_t send_bytes, int
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_close"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id", SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -135,7 +140,9 @@ srs_error_t SrsHttpHooks::on_publish(string url, SrsRequest* req)
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_publish"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id", SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -169,7 +176,9 @@ void SrsHttpHooks::on_unpublish(string url, SrsRequest* req)
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_unpublish"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id", SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -205,7 +214,9 @@ srs_error_t SrsHttpHooks::on_play(string url, SrsRequest* req)
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_play"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id", SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -239,7 +250,9 @@ void SrsHttpHooks::on_stop(string url, SrsRequest* req)
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_stop"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id",SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -276,7 +289,9 @@ srs_error_t SrsHttpHooks::on_dvr(int cid, string url, SrsRequest* req, string fi
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_dvr"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id", SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
@@ -318,7 +333,9 @@ srs_error_t SrsHttpHooks::on_hls(int cid, string url, SrsRequest* req, string fi
     SrsAutoFree(SrsJsonObject, obj);
     
     obj->set("action", SrsJsonAny::str("on_hls"));
-    obj->set("client_id", SrsJsonAny::integer(client_id));
+    obj->set("client_id",SrsJsonAny::str(
+            req->param.size()<11?"":req->param.substr(11).c_str())
+    );
     obj->set("ip", SrsJsonAny::str(req->ip.c_str()));
     obj->set("vhost", SrsJsonAny::str(req->vhost.c_str()));
     obj->set("app", SrsJsonAny::str(req->app.c_str()));
